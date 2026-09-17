@@ -1,4 +1,5 @@
 // 项目页：加载 projects.json，分类渲染卡片，支持标签筛选与搜索，主题切换
+// 每张卡片支持：查看私有仓库链接、一键复制 git clone 命令、权限说明
 (function () {
   const $ = (sel) => document.querySelector(sel);
   const root = document.documentElement;
@@ -54,7 +55,6 @@
     $("#proj-empty").hidden = filtered.length > 0;
 
     const cats = CAT_ORDER.filter((c) => filtered.some((p) => p.category === c));
-    // 不在预定义顺序里的分类放到末尾
     filtered.map((p) => p.category).filter((c, i, a) => a.indexOf(c) === i)
       .forEach((c) => { if (!cats.includes(c)) cats.push(c); });
 
@@ -65,17 +65,41 @@
   }
 
   function cardHTML(p) {
-    const repo = p.repo
-      ? '<a class="pc-path" href="' + p.repo + '" target="_blank" rel="noopener">' + esc(p.path) + " ↗</a>"
-      : '<div class="pc-path">' + esc(p.path) + "</div>";
     const tags = (p.tags || []).map((t) => "<span>" + esc(t) + "</span>").join("");
     const status = STATUS_LABEL[p.status] || p.status;
+
+    let clone;
+    if (p.repo) {
+      const cmd = "git clone " + p.repo + ".git";
+      const short = p.repo.replace(/^https:\/\/github\.com\//, "");
+      const lock = p.private
+        ? '<span class="pc-lock" title="私有仓库，需登录授权">🔒 私有</span>'
+        : '<span class="pc-lock public" title="公开仓库">🌐 公开</span>';
+      const hint = p.private
+        ? '<div class="pc-hint">需登录 <b>7ruman</b> 账号授权（私有仓库），未授权会被拒绝</div>'
+        : '<div class="pc-hint">公开仓库，任何人可 clone</div>';
+      clone =
+        '<div class="pc-clone">' +
+          '<div class="pc-repo">' +
+            '<a href="' + esc(p.repo) + '" target="_blank" rel="noopener">' + esc(short) + " ↗</a>" + lock +
+          "</div>" +
+          '<div class="pc-cmd">' +
+            "<code>" + esc(cmd) + "</code>" +
+            '<button class="copy-btn" data-cmd="' + esc(cmd) + '">复制</button>' +
+          "</div>" +
+          hint +
+        "</div>";
+    } else {
+      clone = '<div class="pc-clone"><div class="pc-hint muted">未推送云端（仅本机存放）</div></div>';
+    }
+
     return (
       '<div class="proj-card">' +
         '<div class="pc-head"><h3>' + esc(p.name) + "</h3>" +
           '<span class="status-badge status-' + p.status + '">' + status + "</span></div>" +
         '<p class="pc-desc">' + esc(p.desc) + "</p>" +
-        repo +
+        '<div class="pc-path">' + esc(p.path) + "</div>" +
+        clone +
         '<div class="card-tags">' + tags + "</div>" +
       "</div>"
     );
@@ -83,6 +107,35 @@
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+
+  // 一键复制（事件委托，兼容重渲染）
+  $("#projects").addEventListener("click", (e) => {
+    const btn = e.target.closest(".copy-btn");
+    if (!btn) return;
+    const cmd = btn.getAttribute("data-cmd") || "";
+    const done = () => {
+      const old = btn.textContent;
+      btn.textContent = "已复制";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = old; btn.classList.remove("copied"); }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cmd).then(done).catch(() => fallbackCopy(cmd, done));
+    } else {
+      fallbackCopy(cmd, done);
+    }
+  });
+
+  function fallbackCopy(text, cb) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); cb(); } catch (_) {}
+    document.body.removeChild(ta);
   }
 
   $("#proj-search").addEventListener("input", (e) => { query = e.target.value; render(); });
