@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "ethercat-stm32",
+    "title": "把 SOEM EtherCAT 主站搬到 STM32H743 上",
+    "date": "2026-09-15",
+    "read": "6 分钟",
+    "tags": ["EtherCAT", "STM32", "FreeRTOS"],
+    "excerpt": "从 Linux 移植 SOEM 到 NUCLEO-H743ZI 的三道坎：网卡驱动、OS 抽象层、PDO 实时刷新，附实测周期抖动。",
+    "file": "posts/ethercat-stm32.md"
+  },
+  {
+    "slug": "foc-notes",
+    "title": "FOC 双版本交付：MATLAB Function vs Simulink 手搭",
+    "date": "2026-09-12",
+    "read": "5 分钟",
+    "tags": ["FOC", "电机控制", "MATLAB"],
+    "excerpt": "为什么每个观测器/控制器都要出代码版和框图版两份，以及 err2 命名陷阱与两个 plant 的约定。",
+    "file": "posts/foc-notes.md"
+  },
+  {
+    "slug": "robot-stability",
+    "title": "机器人刚体扫测：抗倾覆稳定性怎么测",
+    "date": "2026-09-08",
+    "read": "4 分钟",
+    "tags": ["机器人", "稳定性", "仿真"],
+    "excerpt": "HYZY_Robot 80 组参数网格扫描的抗倾覆结论，异常点复测计划，以及中性化报告口径。",
+    "file": "posts/robot-stability.md"
+  }
+]
