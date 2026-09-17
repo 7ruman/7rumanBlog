@@ -2,12 +2,39 @@
 <html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>7ruman的技术博客</title>
-<meta name="description" content="嵌入式 · 机器人 · 电机控制 — 7ruman的技术笔记" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>7ruman · 技术博客</title>
+<meta name="description" content="嵌入式 · 机器人 · 电机控制 — 7ruman 的技术笔记" />
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
+<body class="home">
+
+<!-- 全屏 3D 舞台 -->
+<div class="stage" id="stage">
+  <canvas id="robot3d" class="stage-canvas" aria-hidden="true"></canvas>
+  <div class="stage-glow" aria-hidden="true"></div>
+  <!-- 降级：Three.js 不可用时显示内置 SVG 机器人 -->
+  <div class="hero--robot stage-fallback" id="robotFallback" hidden>
+    <div class="robot-stage" id="robotStage">
+      <svg class="robot" id="robot" viewBox="0 0 200 230" width="240" height="276" role="img" aria-label="交互式机器人">
+        <line class="antenna" x1="100" y1="22" x2="100" y2="42" stroke-width="3"/>
+        <circle class="led" cx="100" cy="16" r="6"/>
+        <circle class="led-pulse" cx="100" cy="16" r="6"/>
+        <rect class="body" x="54" y="42" width="92" height="72" rx="20"/>
+        <circle class="socket" cx="82" cy="74" r="15"/>
+        <circle class="socket" cx="118" cy="74" r="15"/>
+        <circle class="pupil" id="pupilL" cx="82" cy="74" r="6"/>
+        <circle class="pupil" id="pupilR" cx="118" cy="74" r="6"/>
+        <rect class="mouth" x="80" y="98" width="40" height="9" rx="4.5"/>
+        <rect class="body" x="64" y="122" width="72" height="86" rx="18"/>
+        <circle class="panel" cx="100" cy="162" r="16"/>
+        <circle class="led" cx="100" cy="162" r="8"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- 悬浮导航 -->
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="index.html">
@@ -16,9 +43,9 @@
     </a>
     <nav class="nav">
       <a href="index.html" class="active">首页</a>
+      <a href="articles.html">文章</a>
       <a href="projects.html">项目</a>
-      <a href="#posts">文章</a>
-      <a href="#about">关于</a>
+      <a href="articles.html#about">关于</a>
       <button id="theme-toggle" class="icon-btn" title="切换主题" aria-label="切换主题">
         <svg class="ico-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
         <svg class="ico-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
@@ -27,71 +54,24 @@
   </div>
 </header>
 
-<section class="hero hero--robot">
-  <div class="robot-stage" id="robotStage">
-    <svg class="robot" id="robot" viewBox="0 0 200 230" width="240" height="276" role="img" aria-label="交互式机器人">
-      <line class="antenna" x1="100" y1="22" x2="100" y2="42" stroke-width="3"/>
-      <circle class="led" cx="100" cy="16" r="6"/>
-      <circle class="led-pulse" cx="100" cy="16" r="6"/>
-      <rect class="body" x="54" y="42" width="92" height="72" rx="20"/>
-      <circle class="socket" cx="82" cy="74" r="15"/>
-      <circle class="socket" cx="118" cy="74" r="15"/>
-      <circle class="pupil" id="pupilL" cx="82" cy="74" r="6"/>
-      <circle class="pupil" id="pupilR" cx="118" cy="74" r="6"/>
-      <rect class="mouth" x="80" y="98" width="40" height="9" rx="4.5"/>
-      <rect class="body" x="64" y="122" width="72" height="86" rx="18"/>
-      <circle class="panel" cx="100" cy="162" r="16"/>
-      <circle class="led" cx="100" cy="162" r="8"/>
-    </svg>
-  </div>
+<!-- 覆盖层文案 -->
+<main class="stage-overlay">
   <p class="hero-eyebrow">EMBEDDED · ROBOTICS · MOTOR CONTROL</p>
   <h1 class="hero-title">把调试现场，<br/>写成能复用的笔记。</h1>
-  <p class="hero-sub">这里是 7ruman 的技术博客 —— 记录 STM32 / EtherCAT / FOC / 机器人系统落地过程中的踩坑、方案与结论。Markdown 写完即发，干净、好读、可检索。</p>
+  <p class="hero-sub">这里是 7ruman 的技术博客 —— 记录 STM32 / EtherCAT / FOC / 机器人系统落地过程中的踩坑、方案与结论。</p>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="#posts">浏览文章</a>
-    <a class="btn btn-ghost" href="#about">关于我</a>
+    <a class="btn btn-primary" href="articles.html">浏览文章</a>
+    <a class="btn btn-ghost" href="projects.html">看看项目</a>
   </div>
-  <a class="hero-scroll" href="#posts" aria-label="向下滚动查看文章">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
-    <span>向下滚动看文章</span>
-  </a>
-</section>
-
-<main class="container main">
-  <div class="toolbar">
-    <div class="search-box">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      <input id="search" type="search" placeholder="搜索标题、标签或内容…" autocomplete="off" />
-    </div>
-    <div id="tags" class="tags"></div>
-  </div>
-
-  <section id="posts" class="posts">
-    <div id="post-list" class="post-list"><!-- rendered by app.js --></div>
-    <p id="empty" class="empty-tip" hidden>没有匹配的文章。</p>
-  </section>
-
-  <section id="about" class="about card">
-    <h2>关于</h2>
-    <p>7ruman，嵌入式与机器人系统开发者，聚焦 <strong>STM32 / EtherCAT 主站</strong>、<strong>FOC 电机控制</strong> 与 <strong>机器人系统架构</strong>。这个博客用来沉淀可复用的技术方案与调试结论。</p>
-    <ul class="about-links">
-      <li><span>方向</span> 嵌入式 · 实时通信 · 伺服控制 · 机器人</li>
-      <li><span>工具链</span> CubeMX + Keil · MATLAB/Simulink · ROS2</li>
-      <li><span>联系</span> 在本仓库留言或邮件交流</li>
-    </ul>
-  </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <span>© <span id="year"></span> 7ruman · 技术博客</span>
-    <span class="muted">用 Markdown 驱动 · 零依赖静态站点</span>
-  </div>
-</footer>
+<div class="stage-footer">
+  <span>© <span id="year"></span> 7ruman · 技术博客</span>
+  <span class="muted">移动鼠标 / 手指，机器人会看着你</span>
+</div>
 
-<script src="assets/js/markdown.js"></script>
-<script src="assets/js/highlight.js"></script>
+<script src="assets/js/theme.js"></script>
 <script src="assets/js/robot.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/robot3d.js"></script>
 </body>
 </html>
