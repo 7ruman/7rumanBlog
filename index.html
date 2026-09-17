@@ -9,7 +9,7 @@
 </head>
 <body class="home">
 
-<!-- 全屏 3D 舞台 -->
+<!-- 全屏 3D 舞台（独占整页） -->
 <div class="stage" id="stage">
   <canvas id="robot3d" class="stage-canvas" aria-hidden="true"></canvas>
   <div class="stage-glow" aria-hidden="true"></div>
@@ -54,20 +54,12 @@
   </div>
 </header>
 
-<!-- 覆盖层文案 -->
-<main class="stage-overlay">
-  <p class="hero-eyebrow">EMBEDDED · ROBOTICS · MOTOR CONTROL</p>
-  <h1 class="hero-title">把调试现场，<br/>写成能复用的笔记。</h1>
-  <p class="hero-sub">这里是 7ruman 的技术博客 —— 记录 STM32 / EtherCAT / FOC / 机器人系统落地过程中的踩坑、方案与结论。</p>
-  <div class="hero-actions">
-    <a class="btn btn-primary" href="articles.html">浏览文章</a>
-    <a class="btn btn-ghost" href="projects.html">看看项目</a>
-  </div>
-</main>
-
+<!-- 极简入口 -->
+<div class="stage-cta">
+  <a class="btn btn-ghost" href="articles.html">浏览文章 →</a>
+</div>
 <div class="stage-footer">
-  <span>© <span id="year"></span> 7ruman · 技术博客</span>
-  <span class="muted">移动鼠标 / 手指，机器人会看着你</span>
+  <span class="muted">© <span id="year"></span> 7ruman · 移动鼠标，机器人会看着你</span>
 </div>
 
 <script src="assets/js/theme.js"></script>

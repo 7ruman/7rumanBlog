@@ -1,4 +1,4 @@
-// 首页：全屏 3D 机器人（Three.js，纯几何体程序化生成，无外部模型）
+// 首页：整屏「线条 3D」机器人（Three.js 线框全息风，纯几何体程序化生成）
 // CDN 三级回退；加载/WebGL 失败则回退到内置 SVG 机器人
 (function () {
   const canvas = document.getElementById("robot3d");
@@ -38,108 +38,126 @@
   function pal() {
     const light = document.documentElement.getAttribute("data-theme") === "light";
     return light
-      ? { body: 0xffffff, body2: 0xdde5f2, dark: 0x151a26, accent: 0x3d6fe3, accent2: 0x7c5cff,
-          accent3: 0x0e93ad, grid: 0xc2cce0, floor: 0xe7ecf6 }
-      : { body: 0x27303f, body2: 0x1b2230, dark: 0x090d15, accent: 0x7aa2f7, accent2: 0xbb9af7,
-          accent3: 0x7dcfff, grid: 0x2c3752, floor: 0x0d1119 };
+      ? { accent: 0x2f63d8, accent2: 0x6b3ff0, accent3: 0x0b7f96, grid: 0xb9c4da }
+      : { accent: 0x7aa2f7, accent2: 0xbb9af7, accent3: 0x7dcfff, grid: 0x2b3652 };
   }
 
   function start(THREE) {
-    const P = pal();
+    let light = document.documentElement.getAttribute("data-theme") === "light";
+    let P = pal();
+
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
     } catch (e) { return showFallback(); }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setClearColor(0x000000, 0);
-    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
-    camera.position.set(0, 0.1, 6.6);
+    camera.position.set(0, 0, 6.2);
 
-    /* ---------- 灯光 ---------- */
-    scene.add(new THREE.HemisphereLight(0xffffff, P.floor, 0.5));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(4, 8, 6); scene.add(key);
-    const fill = new THREE.PointLight(P.accent, 1.5, 50); fill.position.set(-6, 1.5, 4); scene.add(fill);
-    const rim = new THREE.PointLight(P.accent2, 1.6, 50); rim.position.set(6, -1, -5); scene.add(rim);
+    /* ---------- 用线条构建零件（主线 + 微弱光晕） ---------- */
+    const mats = []; // { mat, role } 供主题联动
+    const colOf = (role) => (role === "eye" ? P.accent3 : role === "accent2" ? P.accent2 : P.accent);
 
-    /* ---------- 地面网格 ---------- */
-    const grid = new THREE.GridHelper(70, 70, P.grid, P.grid);
+    function addPart(parent, geo, role, haloScale) {
+      const wg = new THREE.WireframeGeometry(geo);
+      const mainOp = role === "eye" ? 1 : 0.9;
+      const haloOp = role === "eye" ? 0.3 : 0.15;
+      const mMain = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: mainOp, depthWrite: false });
+      const mHalo = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: haloOp, depthWrite: false });
+      mats.push({ mat: mMain, role, base: mainOp }, { mat: mHalo, role, base: haloOp });
+      const main = new THREE.LineSegments(wg, mMain);
+      const halo = new THREE.LineSegments(wg, mHalo);
+      halo.scale.setScalar(haloScale || 1.035);
+      parent.add(main, halo);
+    }
+
+    /* ---------- 地面网格 + 辉光盘 ---------- */
+    const grid = new THREE.GridHelper(80, 80, P.grid, P.grid);
     grid.position.y = -3.2;
     grid.material.transparent = true;
-    grid.material.opacity = 0.32;
+    grid.material.opacity = 0.3;
+    grid.material.depthWrite = false;
     scene.add(grid);
     const disc = new THREE.Mesh(
-      new THREE.CircleGeometry(2.4, 48),
-      new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.07 })
+      new THREE.CircleGeometry(2.6, 56),
+      new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.06, depthWrite: false })
     );
     disc.rotation.x = -Math.PI / 2;
     disc.position.y = -3.18;
     scene.add(disc);
 
-    /* ---------- 材质 ---------- */
-    const matBody = new THREE.MeshStandardMaterial({ color: P.body, roughness: 0.36, metalness: 0.45 });
-    const matBody2 = new THREE.MeshStandardMaterial({ color: P.body2, roughness: 0.5, metalness: 0.3 });
-    const matDark = new THREE.MeshStandardMaterial({ color: P.dark, roughness: 0.16, metalness: 0.7 });
-    const matGlow = new THREE.MeshStandardMaterial({ color: P.accent3, emissive: P.accent3, emissiveIntensity: 1.1, roughness: 0.3 });
-    const matGlow2 = new THREE.MeshStandardMaterial({ color: P.accent2, emissive: P.accent2, emissiveIntensity: 0.9, roughness: 0.3 });
-    const matEdge = new THREE.MeshStandardMaterial({ color: P.accent, emissive: P.accent, emissiveIntensity: 0.55, roughness: 0.3, metalness: 0.2 });
-
-    /* ---------- 机器人 ---------- */
+    /* ---------- 机器人（低模几何 → 线框） ---------- */
     const robot = new THREE.Group();
+    robot.scale.setScalar(1.12);
     scene.add(robot);
     const head = new THREE.Group();
     robot.add(head);
 
-    // 头
-    const skull = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 48), matBody);
-    skull.scale.set(1.05, 0.9, 0.95);
-    head.add(skull);
-    // 面罩
-    const visor = new THREE.Mesh(new THREE.SphereGeometry(0.78, 40, 40), matDark);
-    visor.scale.set(1.12, 0.66, 0.42);
+    // 头 / 面罩
+    addPart(head, new THREE.SphereGeometry(1, 20, 14), "body", 1.03);
+    const visorGeo = new THREE.SphereGeometry(0.78, 16, 12);
+    const visor = new THREE.Group();
+    visor.scale.set(1.12, 0.66, 0.44);
     visor.position.set(0, 0.02, 0.52);
+    addPart(visor, visorGeo, "eye", 1.05);
     head.add(visor);
-    // 眼睛 + 瞳孔
-    const eyeGeo = new THREE.SphereGeometry(0.145, 24, 24);
-    const eyeL = new THREE.Mesh(eyeGeo, matGlow); eyeL.position.set(-0.3, 0.06, 0.85); head.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGeo, matGlow); eyeR.position.set(0.3, 0.06, 0.85); head.add(eyeR);
-    const pupGeo = new THREE.SphereGeometry(0.062, 16, 16);
-    const pupMat = new THREE.MeshBasicMaterial({ color: 0x06080d });
-    const pupL = new THREE.Mesh(pupGeo, pupMat); pupL.position.set(-0.3, 0.06, 0.985); head.add(pupL);
-    const pupR = new THREE.Mesh(pupGeo, pupMat); pupR.position.set(0.3, 0.06, 0.985); head.add(pupR);
-    // 天线
-    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.42, 12), matBody2);
-    ant.position.set(0, 1.02, 0); head.add(ant);
-    const antBall = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 20), matGlow2);
-    antBall.position.set(0, 1.27, 0); head.add(antBall);
-    // 耳
-    const earGeo = new THREE.CylinderGeometry(0.17, 0.17, 0.14, 24);
-    const earL = new THREE.Mesh(earGeo, matBody2); earL.rotation.z = Math.PI / 2; earL.position.set(-1.0, 0, 0); head.add(earL);
-    const earR = new THREE.Mesh(earGeo, matBody2); earR.rotation.z = Math.PI / 2; earR.position.set(1.0, 0, 0); head.add(earR);
-    const dGeo = new THREE.SphereGeometry(0.05, 12, 12);
-    const dotL = new THREE.Mesh(dGeo, matGlow); dotL.position.set(-1.09, 0, 0); head.add(dotL);
-    const dotR = new THREE.Mesh(dGeo, matGlow); dotR.position.set(1.09, 0, 0); head.add(dotR);
 
-    // 颈 + 躯干
-    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.3, 0.36, 24), matBody2);
-    neck.position.y = -1.02; robot.add(neck);
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.05, 1.35, 40), matBody);
-    torso.position.y = -1.88; robot.add(torso);
-    // 胸口发光核心
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.33, 0.05, 16, 44), matGlow);
-    ring.position.set(0, -1.82, 1.0); robot.add(ring);
-    const core = new THREE.Mesh(new THREE.SphereGeometry(0.14, 20, 20), matGlow2);
-    core.position.set(0, -1.82, 1.02); robot.add(core);
+    // 眼睛 + 瞳孔
+    const eyes = new THREE.Group();
+    const eyeGeo = new THREE.SphereGeometry(0.15, 12, 9);
+    const eyeL = new THREE.Group(); eyeL.position.set(-0.3, 0.06, 0.85); addPart(eyeL, eyeGeo, "eye", 1.12); eyes.add(eyeL);
+    const eyeR = new THREE.Group(); eyeR.position.set(0.3, 0.06, 0.85); addPart(eyeR, eyeGeo, "eye", 1.12); eyes.add(eyeR);
+    head.add(eyes);
+    const pupGeo = new THREE.SphereGeometry(0.062, 9, 7);
+    const pupL = new THREE.Group(); pupL.position.set(-0.3, 0.06, 0.985); addPart(pupL, pupGeo, "body", 1.1); head.add(pupL);
+    const pupR = new THREE.Group(); pupR.position.set(0.3, 0.06, 0.985); addPart(pupR, pupGeo, "body", 1.1); head.add(pupR);
+
+    // 天线
+    const ant = new THREE.Group(); ant.position.set(0, 1.02, 0);
+    addPart(ant, new THREE.CylinderGeometry(0.03, 0.03, 0.42, 8, 1), "body", 1.08);
+    head.add(ant);
+    const antBall = new THREE.Group(); antBall.position.set(0, 1.27, 0);
+    addPart(antBall, new THREE.SphereGeometry(0.1, 12, 9), "accent2", 1.15);
+    head.add(antBall);
+
+    // 耳
+    for (const sx of [-1, 1]) {
+      const ear = new THREE.Group(); ear.position.set(sx * 1.0, 0, 0);
+      addPart(ear, new THREE.CylinderGeometry(0.17, 0.17, 0.14, 14), "body", 1.06);
+      head.add(ear);
+      const dot = new THREE.Group(); dot.position.set(sx * 1.1, 0, 0);
+      addPart(dot, new THREE.SphereGeometry(0.05, 9, 7), "eye", 1.2);
+      head.add(dot);
+    }
+
+    // 颈 / 躯干 / 胸口核心
+    const neck = new THREE.Group(); neck.position.y = -1.02;
+    addPart(neck, new THREE.CylinderGeometry(0.26, 0.32, 0.36, 14), "body", 1.06);
+    robot.add(neck);
+
+    const torso = new THREE.Group(); torso.position.y = -1.88;
+    addPart(torso, new THREE.CylinderGeometry(0.85, 1.05, 1.35, 18, 2), "body", 1.03);
+    robot.add(torso);
+
+    const ringG = new THREE.Group(); ringG.position.set(0, -1.82, 0.98);
+    addPart(ringG, new THREE.TorusGeometry(0.34, 0.05, 8, 30), "eye", 1.1);
+    robot.add(ringG);
+    const core = new THREE.Group(); core.position.set(0, -1.82, 1.0);
+    addPart(core, new THREE.SphereGeometry(0.14, 12, 10), "accent2", 1.15);
+    robot.add(core);
 
     // 手臂
-    const armGeo = new THREE.CylinderGeometry(0.13, 0.13, 1.1, 20);
-    const armL = new THREE.Mesh(armGeo, matBody2); armL.position.set(-1.12, -1.95, 0); armL.rotation.z = 0.22; robot.add(armL);
-    const armR = new THREE.Mesh(armGeo, matBody2); armR.position.set(1.12, -1.95, 0); armR.rotation.z = -0.22; robot.add(armR);
-    const handGeo = new THREE.SphereGeometry(0.17, 20, 20);
-    const handL = new THREE.Mesh(handGeo, matEdge); handL.position.set(-1.25, -2.5, 0); robot.add(handL);
-    const handR = new THREE.Mesh(handGeo, matEdge); handR.position.set(1.25, -2.5, 0); robot.add(handR);
+    for (const sx of [-1, 1]) {
+      const arm = new THREE.Group(); arm.position.set(sx * 1.12, -1.95, 0); arm.rotation.z = -sx * 0.22;
+      addPart(arm, new THREE.CylinderGeometry(0.13, 0.13, 1.1, 10), "body", 1.06);
+      robot.add(arm);
+      const hand = new THREE.Group(); hand.position.set(sx * 1.25, -2.5, 0);
+      addPart(hand, new THREE.SphereGeometry(0.17, 12, 9), "accent2", 1.1);
+      robot.add(hand);
+    }
 
     /* ---------- 交互 ---------- */
     let px = 0, py = 0, tpx = 0, tpy = 0;
@@ -158,7 +176,7 @@
       const w = window.innerWidth, h = window.innerHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      camera.position.z = w < 640 ? 9.4 : (w < 1024 ? 7.8 : 6.6);
+      camera.position.z = w < 640 ? 8.8 : (w < 1024 ? 7.2 : 6.2);
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", resize);
@@ -172,43 +190,43 @@
       py += (tpy - py) * 0.06;
 
       if (!reduce) {
-        robot.position.y = Math.sin(t * 1.1) * 0.09;
+        robot.position.y = Math.sin(t * 1.1) * 0.1;
         robot.rotation.y = px * 0.42;
         head.rotation.y = px * 0.34;
         head.rotation.x = py * 0.2;
-        head.position.y = Math.sin(t * 1.1 + 0.6) * 0.028;
+        head.position.y = Math.sin(t * 1.1 + 0.6) * 0.03;
         torso.rotation.z = Math.sin(t * 0.7) * 0.02;
-        const s = 1 + Math.sin(t * 3.2) * 0.09;
+        const s = 1 + Math.sin(t * 3.2) * 0.1;
         antBall.scale.set(s, s, s);
+        ringG.rotation.z = t * 0.5;
       }
-      antBall.material.emissiveIntensity = 0.85 + Math.sin(t * 3.2) * 0.45;
-      core.material.emissiveIntensity = 0.9 + Math.sin(t * 2.2 + 1) * 0.4;
-
       pupL.position.x = -0.3 + px * 0.055;
       pupR.position.x = 0.3 + px * 0.055;
       pupL.position.y = pupR.position.y = 0.06 - py * 0.045;
 
-      camera.position.x = px * 0.35;
-      camera.lookAt(0, -1.0, 0);
-      fill.position.x = -6 + px * 2;
-      rim.position.x = 6 + px * 2;
+      camera.position.x = px * 0.32;
+      camera.lookAt(0, -0.8, 0);
 
       renderer.render(scene, camera);
     }
     tick();
 
-    /* ---------- 主题联动 ---------- */
-    new MutationObserver(() => {
-      const Q = pal();
-      matBody.color.setHex(Q.body);
-      matBody2.color.setHex(Q.body2);
-      matDark.color.setHex(Q.dark);
-      matGlow.color.setHex(Q.accent3); matGlow.emissive.setHex(Q.accent3);
-      matGlow2.color.setHex(Q.accent2); matGlow2.emissive.setHex(Q.accent2);
-      matEdge.color.setHex(Q.accent); matEdge.emissive.setHex(Q.accent);
-      fill.color.setHex(Q.accent);
-      rim.color.setHex(Q.accent2);
-      grid.material.color.setHex(Q.grid);
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    /* ---------- 主题联动（深色用叠加发光，浅色用实线） ---------- */
+    function applyTheme() {
+      light = document.documentElement.getAttribute("data-theme") === "light";
+      P = pal();
+      mats.forEach(({ mat, role, base }) => {
+        mat.color.setHex(colOf(role));
+        mat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+        mat.opacity = Math.min(1, base * (light ? 1.16 : 1));
+        mat.needsUpdate = true;
+      });
+      grid.material.color.setHex(P.grid);
+      grid.material.opacity = light ? 0.42 : 0.3;
+      disc.material.color.setHex(P.accent);
+      disc.material.opacity = light ? 0.05 : 0.06;
+    }
+    applyTheme();
+    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   }
 })();
