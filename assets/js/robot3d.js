@@ -25,7 +25,11 @@
   }
   function showFallback() {
     canvas.style.display = "none";
-    if (fallback) fallback.hidden = false;
+    if (fallback) { fallback.hidden = false; fallback.style.display = ""; }
+  }
+  // 3D 正常时：用内联样式把降级机器人彻底按死（不依赖 CSS 是否被缓存/被其它规则覆盖）
+  function hideFallback() {
+    if (fallback) { fallback.hidden = true; fallback.style.display = "none"; }
   }
 
   loadScript(CDNS)
@@ -52,6 +56,7 @@
     } catch (e) { return showFallback(); }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setClearColor(0x000000, 0);
+    hideFallback(); // 3D 起来了 → 降级机器人立即隐藏
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
@@ -61,17 +66,13 @@
     const mats = []; // { mat, role } 供主题联动
     const colOf = (role) => (role === "eye" ? P.accent3 : role === "accent2" ? P.accent2 : P.accent);
 
-    function addPart(parent, geo, role, haloScale) {
+    // 单层线条（去掉"光晕副本"，避免看起来像重影/两台机器人）
+    function addPart(parent, geo, role) {
       const wg = new THREE.WireframeGeometry(geo);
-      const mainOp = role === "eye" ? 1 : 0.9;
-      const haloOp = role === "eye" ? 0.3 : 0.15;
-      const mMain = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: mainOp, depthWrite: false });
-      const mHalo = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: haloOp, depthWrite: false });
-      mats.push({ mat: mMain, role, base: mainOp }, { mat: mHalo, role, base: haloOp });
-      const main = new THREE.LineSegments(wg, mMain);
-      const halo = new THREE.LineSegments(wg, mHalo);
-      halo.scale.setScalar(haloScale || 1.035);
-      parent.add(main, halo);
+      const op = role === "eye" ? 1 : 0.92;
+      const mat = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: op, depthWrite: false });
+      mats.push({ mat, role, base: op });
+      parent.add(new THREE.LineSegments(wg, mat));
     }
 
     /* ---------- 地面网格 + 辉光盘 ---------- */
