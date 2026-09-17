@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>文章 · 7ruman的技术博客</title>
+<title>项目 · 7ruman的技术博客</title>
+<meta name="description" content="7ruman 的工程项目集 —— 机器人 / 电机控制 / EtherCAT / AI 智能体 / 嵌入式" />
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
@@ -15,7 +16,7 @@
     </a>
     <nav class="nav">
       <a href="index.html">首页</a>
-      <a href="projects.html">项目</a>
+      <a href="projects.html" class="active">项目</a>
       <a href="index.html#posts">文章</a>
       <a href="index.html#about">关于</a>
       <button id="theme-toggle" class="icon-btn" title="切换主题" aria-label="切换主题">
@@ -27,12 +28,23 @@
 </header>
 
 <main class="container main">
-  <article id="article" class="article">
-    <div id="loading" class="empty-tip">加载中…</div>
-  </article>
-  <div class="post-nav">
-    <a class="btn btn-ghost" href="index.html">← 返回首页</a>
+  <section class="page-head">
+    <p class="eyebrow">PROJECTS · 工程作品集</p>
+    <h1>这台电脑上的项目</h1>
+    <p>把散落在各处的工程聚到一起：机器人系统、电机与控制、EtherCAT、嵌入式 ECU、AI 智能体，以及日常用的小工具。点标签或搜索可快速定位。</p>
+  </section>
+
+  <div class="proj-toolbar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="proj-search" type="search" placeholder="搜索项目名、标签或路径…" autocomplete="off" />
+    </div>
+    <span id="proj-count" class="proj-count"></span>
   </div>
+  <div id="proj-tags" class="tags"></div>
+
+  <section id="projects" class="projects"><!-- rendered by projects.js --></section>
+  <p id="proj-empty" class="empty-tip" hidden>没有匹配的项目。</p>
 </main>
 
 <footer class="site-footer">
@@ -42,8 +54,6 @@
   </div>
 </footer>
 
-<script src="assets/js/markdown.js"></script>
-<script src="assets/js/highlight.js"></script>
-<script src="assets/js/post.js"></script>
+<script src="assets/js/projects.js"></script>
 </body>
 </html>

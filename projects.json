@@ -1,0 +1,155 @@
+[
+  {
+    "name": "L1 机器人代码库",
+    "category": "机器人系统",
+    "desc": "l1_max_release-1.2.0 整机代码库；含 xArm CAN / ROS2 / teleop SDK 与 Jetson CUDA 推理环境。",
+    "tags": ["C++", "ROS2", "xArm", "Jetson", "CUDA"],
+    "path": "D:\\PrjBot\\L1_max",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "STM32+ROS 量产机器人",
+    "category": "机器人系统",
+    "desc": "量产架构方案 A：轮式底盘 + 7-DOF 仿生上肢 + 灵巧手 + 滑轨立柱 + 快换板，处于架构与选型收敛阶段。",
+    "tags": ["STM32", "ROS2", "FreeRTOS", "机械臂"],
+    "path": "D:\\STM32_ROS",
+    "repo": "",
+    "status": "planning"
+  },
+  {
+    "name": "xlerobot",
+    "category": "机器人系统",
+    "desc": "xlerobot（SO-100 类）机械臂的仿真描述文件（SDFormat）与训练数据管线。",
+    "tags": ["ROS2", "SDFormat", "Python", "Lerobot"],
+    "path": "D:\\xlerobot_sdf\\xlerobot",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "工厂机器人产线",
+    "category": "机器人系统",
+    "desc": "Jetson + xArm 双臂 + 胸相机 D435 工厂产线；左臂抓取链路 sku_detector → grasp_pose → grasp_executor。",
+    "tags": ["Jetson", "xArm", "D435", "ROS2", "视觉抓取"],
+    "path": "C:\\Users\\Administrator\\未来动力L1\\我的\\factory_ws",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "OHand 灵巧手 SDK",
+    "category": "机器人系统",
+    "desc": "OYMotion OHand 控制 SDK（头文件 + 静态库 + 示例）与 roh_gen2 固件。",
+    "tags": ["C/C++", "SDK", "灵巧手", "OYMotion"],
+    "path": "D:\\BotPrj\\Oymotion",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "FOC 文档库",
+    "category": "电机与控制",
+    "desc": "36 个主模型 + 49 个算法文件的双版本（MATLAB Function + Simulink 基础库）FOC 文档库，以 sanity_check.m 验证为准。",
+    "tags": ["MATLAB", "Simulink", "FOC", "PMSM", "BLDC"],
+    "path": "D:\\PrjBot\\foc",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "EtherCAT 主站移植",
+    "category": "电机与控制",
+    "desc": "SOEM EtherCAT 主站移植到 STM32H743（NUCLEO-H743ZI + EK1100/EL2024/EL1014 已跑通），配套两款单文件 HTML 工具。",
+    "tags": ["SOEM", "STM32H743", "EtherCAT", "FreeRTOS"],
+    "path": "D:\\BotPrj",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "HJ50 通用 ECU + 上位机",
+    "category": "嵌入式 ECU",
+    "desc": "通用 ECU 程序 + 多协议通信（422 / 485 / IO）与上位机软件，含统一协议与版本管理。",
+    "tags": ["ECU", "C", "422/485/CAN", "上位机"],
+    "path": "D:\\Prjs\\HJ50",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "STM32 ECU Demo",
+    "category": "嵌入式 ECU",
+    "desc": "CubeMX + Keil MDK-ARM 的 STM32 ECU 示例工程，含 BSP / 驱动 / ECU_App 分层结构。",
+    "tags": ["STM32", "CubeMX", "Keil MDK", "ECU"],
+    "path": "D:\\Prjs\\multi_demo",
+    "repo": "",
+    "status": "demo"
+  },
+  {
+    "name": "Ori 通用 ECU 变体",
+    "category": "嵌入式 ECU",
+    "desc": "通用 ECU 多版本 / 扩展板工程（Multi_ori、通用扩展板）。",
+    "tags": ["ECU", "C", "扩展板"],
+    "path": "D:\\Prjs\\Ori",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "Trumanflow",
+    "category": "AI 智能体",
+    "desc": "Trumanflow 智能体框架：app + agent tools + 文档，支持多 agent 编排。",
+    "tags": ["Python", "AI Agent", "框架"],
+    "path": "D:\\Trumanflow",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "hyFlow AI 任务分解",
+    "category": "AI 智能体",
+    "desc": "hyFlow 分配给临时 agent 的默认工作区与任务分解配置（worktree 分支管理）。",
+    "tags": ["AI", "工作流", "分解"],
+    "path": "C:\\Users\\Administrator\\hyflow-ai-decompose",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "EtherCAT 代码生成器",
+    "category": "Web 与工具",
+    "desc": "单文件零依赖深色主题工具，自动生成 SOEM EtherCAT 移植代码。",
+    "tags": ["HTML", "零依赖", "工具", "EtherCAT"],
+    "path": "my-blog 工具 / ecat_port_tool.html",
+    "repo": "",
+    "status": "tool"
+  },
+  {
+    "name": "Keil 集成器",
+    "category": "Web 与工具",
+    "desc": "单文件工具，自动把生成的源文件并入 Keil .uvprojx 工程。",
+    "tags": ["HTML", "零依赖", "工具", "Keil"],
+    "path": "my-blog 工具 / keil_ecat_integrator.html",
+    "repo": "",
+    "status": "tool"
+  },
+  {
+    "name": "HF 周报工具",
+    "category": "Web 与工具",
+    "desc": "基于 Electron 的周报工具：开发版完整源码，负责人版便携 exe（无需 Node）。",
+    "tags": ["Electron", "Node.js", "桌面应用"],
+    "path": "D:\\Prjs\\HF",
+    "repo": "",
+    "status": "active"
+  },
+  {
+    "name": "钉钉 H5 微应用",
+    "category": "Web 与工具",
+    "desc": "钉钉企业微应用 H5 教程工程（后端 + index.html 首页）。",
+    "tags": ["Java", "H5", "DingTalk", "微应用"],
+    "path": "D:\\Ding_prjs\\h5_demo",
+    "repo": "",
+    "status": "demo"
+  },
+  {
+    "name": "7rumanBlog 博客",
+    "category": "博客",
+    "desc": "你正在看的这个博客：Markdown 驱动、零依赖、含交互机器人 hero，部署于 GitHub Pages。",
+    "tags": ["静态站", "Markdown", "零依赖"],
+    "path": "本仓库 (my-blog)",
+    "repo": "https://github.com/7ruman/7rumanBlog",
+    "status": "active"
+  }
+]
