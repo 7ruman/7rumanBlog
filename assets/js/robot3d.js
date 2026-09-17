@@ -39,6 +39,27 @@
     })
     .catch(showFallback);
 
+  // 背景视频：确保静音自动播放（部分浏览器会拦，需显式 play() 兜底）
+  (function setupStageVideo() {
+    const v = document.querySelector(".stage-video video");
+    if (!v) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    if (v.readyState >= 2) tryPlay();
+    v.addEventListener("loadeddata", tryPlay, { once: true });
+    v.addEventListener("canplay", tryPlay, { once: true });
+    const once = () => {
+      tryPlay();
+      window.removeEventListener("click", once);
+      window.removeEventListener("touchstart", once);
+      window.removeEventListener("keydown", once);
+    };
+    window.addEventListener("click", once);
+    window.addEventListener("touchstart", once);
+    window.addEventListener("keydown", once);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) tryPlay(); });
+  })();
+
   function pal() {
     const light = document.documentElement.getAttribute("data-theme") === "light";
     return light
@@ -69,7 +90,7 @@
     // 单层线条（去掉"光晕副本"，避免看起来像重影/两台机器人）
     function addPart(parent, geo, role) {
       const wg = new THREE.WireframeGeometry(geo);
-      const op = role === "eye" ? 1 : 0.92;
+      const op = 1; // 背景变亮后线条全不透明，保证对比度
       const mat = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: op, depthWrite: false });
       mats.push({ mat, role, base: op });
       parent.add(new THREE.LineSegments(wg, mat));
