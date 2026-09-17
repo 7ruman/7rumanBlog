@@ -63,8 +63,8 @@
   function pal() {
     const light = document.documentElement.getAttribute("data-theme") === "light";
     return light
-      ? { accent: 0x2f63d8, accent2: 0x6b3ff0, accent3: 0x0b7f96, grid: 0xb9c4da }
-      : { accent: 0x7aa2f7, accent2: 0xbb9af7, accent3: 0x7dcfff, grid: 0x2b3652 };
+      ? { accent: 0x2f63d8, accent2: 0x6b3ff0, accent3: 0x0b7f96 }
+      : { accent: 0x7aa2f7, accent2: 0xbb9af7, accent3: 0x7dcfff };
   }
 
   function start(THREE) {
@@ -96,13 +96,7 @@
       parent.add(new THREE.LineSegments(wg, mat));
     }
 
-    /* ---------- 地面网格 + 辉光盘 ---------- */
-    const grid = new THREE.GridHelper(80, 80, P.grid, P.grid);
-    grid.position.y = -3.2;
-    grid.material.transparent = true;
-    grid.material.opacity = 0.3;
-    grid.material.depthWrite = false;
-    scene.add(grid);
+    /* ---------- 地面辉光盘（原 GridHelper 已移除：会与背景视频里的地面网格重叠） ---------- */
     const disc = new THREE.Mesh(
       new THREE.CircleGeometry(2.6, 56),
       new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.06, depthWrite: false })
@@ -243,8 +237,6 @@
         mat.opacity = Math.min(1, base * (light ? 1.16 : 1));
         mat.needsUpdate = true;
       });
-      grid.material.color.setHex(P.grid);
-      grid.material.opacity = light ? 0.42 : 0.3;
       disc.material.color.setHex(P.accent);
       disc.material.opacity = light ? 0.05 : 0.06;
     }
