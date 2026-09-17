@@ -27,16 +27,34 @@
   </div>
 </header>
 
-<section class="hero">
-  <div class="container">
-    <p class="hero-eyebrow">EMBEDDED · ROBOTICS · MOTOR CONTROL</p>
-    <h1 class="hero-title">把调试现场，<br/>写成能复用的笔记。</h1>
-    <p class="hero-sub">这里是7ruman的技术博客 —— 记录 STM32 / EtherCAT / FOC / 机器人系统落地过程中的踩坑、方案与结论。Markdown 写完即发，干净、好读、可检索。</p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="#posts">浏览文章</a>
-      <a class="btn btn-ghost" href="#about">关于我</a>
-    </div>
+<section class="hero hero--robot">
+  <div class="robot-stage" id="robotStage">
+    <svg class="robot" id="robot" viewBox="0 0 200 230" width="240" height="276" role="img" aria-label="交互式机器人">
+      <line class="antenna" x1="100" y1="22" x2="100" y2="42" stroke-width="3"/>
+      <circle class="led" cx="100" cy="16" r="6"/>
+      <circle class="led-pulse" cx="100" cy="16" r="6"/>
+      <rect class="body" x="54" y="42" width="92" height="72" rx="20"/>
+      <circle class="socket" cx="82" cy="74" r="15"/>
+      <circle class="socket" cx="118" cy="74" r="15"/>
+      <circle class="pupil" id="pupilL" cx="82" cy="74" r="6"/>
+      <circle class="pupil" id="pupilR" cx="118" cy="74" r="6"/>
+      <rect class="mouth" x="80" y="98" width="40" height="9" rx="4.5"/>
+      <rect class="body" x="64" y="122" width="72" height="86" rx="18"/>
+      <circle class="panel" cx="100" cy="162" r="16"/>
+      <circle class="led" cx="100" cy="162" r="8"/>
+    </svg>
   </div>
+  <p class="hero-eyebrow">EMBEDDED · ROBOTICS · MOTOR CONTROL</p>
+  <h1 class="hero-title">把调试现场，<br/>写成能复用的笔记。</h1>
+  <p class="hero-sub">这里是 7ruman 的技术博客 —— 记录 STM32 / EtherCAT / FOC / 机器人系统落地过程中的踩坑、方案与结论。Markdown 写完即发，干净、好读、可检索。</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="#posts">浏览文章</a>
+    <a class="btn btn-ghost" href="#about">关于我</a>
+  </div>
+  <a class="hero-scroll" href="#posts" aria-label="向下滚动查看文章">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+    <span>向下滚动看文章</span>
+  </a>
 </section>
 
 <main class="container main">
@@ -73,6 +91,7 @@
 
 <script src="assets/js/markdown.js"></script>
 <script src="assets/js/highlight.js"></script>
+<script src="assets/js/robot.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
