@@ -15,7 +15,7 @@
   });
   $("#year").textContent = new Date().getFullYear();
 
-  const CAT_ORDER = ["机器人系统", "电机与控制", "嵌入式 ECU", "AI 智能体", "Web 与工具", "博客"];
+  const CAT_ORDER = ["机器人系统", "电机与控制", "嵌入式 ECU", "硬件设计", "AI 智能体", "Web 与工具", "博客"];
   const STATUS_LABEL = { active: "进行中", planning: "规划中", demo: "示例", tool: "工具" };
 
   let projects = [];

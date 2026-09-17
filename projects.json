@@ -1,5 +1,25 @@
 [
   {
+    "name": "starry-sky 星空板 PCB",
+    "category": "硬件设计",
+    "desc": "PMS150G_C8725_LED「星空板」Altium 工程：原理图 + PCB + 工程文件（本地 D:\\ss，原托管于 Gitee）。",
+    "tags": ["Altium", "PCB", "原理图", "硬件"],
+    "path": "D:\\ss",
+    "repo": "https://github.com/7ruman/starry-sky",
+    "private": true,
+    "status": "active"
+  },
+  {
+    "name": "myPrj 交互式 HTML 工具集",
+    "category": "Web 与工具",
+    "desc": "15 个零依赖交互式网页：FOC 技术树/面试库、电机学习路线、正向运动学、万向节死锁 3D、URDF 速查、具身智能仿真、量产架构等。",
+    "tags": ["HTML", "零依赖", "FOC", "运动学", "仿真", "架构"],
+    "path": "C:\\Users\\Administrator\\Desktop\\myPrj",
+    "repo": "https://github.com/7ruman/myPrj",
+    "private": true,
+    "status": "tool"
+  },
+  {
     "name": "L1 机器人代码库",
     "category": "机器人系统",
     "desc": "l1_max_release-1.2.0 整机代码库；含 xArm CAN / ROS2 / teleop SDK 与 Jetson CUDA 推理环境（CUDA/torch 安装包已排除，需自行重装）。",
