@@ -1,4 +1,4 @@
-# 鲁高峰的技术博客
+# 7ruman的技术博客
 
 零依赖静态博客：写 Markdown 就能发文章，UI 精致、支持深色/浅色、标签筛选与搜索。可直接部署到 CloudStudio / GitHub Pages / Gitee Pages / Cloudflare Pages 等任意静态托管。
 

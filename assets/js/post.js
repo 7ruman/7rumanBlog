@@ -25,7 +25,7 @@
         .then((r) => r.text())
         .then((md) => {
           const body = window.MD.parse(md);
-          document.title = meta.title + " · 鲁高峰的技术博客";
+          document.title = meta.title + " · 7ruman的技术博客";
           article.innerHTML =
             `<div class="post-meta"><span>${meta.date}</span>${(meta.tags || []).map((t) => `<span class="tag-chip" style="cursor:default">${t}</span>`).join("")}</div>` +
             `<h1>${meta.title}</h1>` + body;
