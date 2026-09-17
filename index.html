@@ -5,12 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>7ruman · 技术博客</title>
 <meta name="description" content="嵌入式 · 机器人 · 电机控制 — 7ruman 的技术笔记" />
-<link rel="stylesheet" href="assets/css/style.css?v=5" />
+<link rel="stylesheet" href="assets/css/style.css?v=6" />
 </head>
 <body class="home">
 
 <!-- 全屏 3D 舞台（独占整页） -->
 <div class="stage" id="stage">
+  <!-- 动态背景：ANYmal-C 强化学习跑测视频（静音循环，降级为渐变） -->
+  <div class="stage-video" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="auto" disablepictureinpicture>
+      <source src="assets/media/anymal-rollout.mp4?v=1" type="video/mp4" />
+    </video>
+  </div>
   <canvas id="robot3d" class="stage-canvas" aria-hidden="true"></canvas>
   <div class="stage-glow" aria-hidden="true"></div>
   <!-- 降级：Three.js 不可用时显示内置 SVG 机器人 -->
@@ -58,9 +64,9 @@
   <span class="muted">© <span id="year"></span> 7ruman · 移动鼠标，机器人会看着你</span>
 </div>
 
-<script src="assets/js/theme.js?v=5"></script>
-<script src="assets/js/brandbot.js?v=5"></script>
-<script src="assets/js/robot.js?v=5"></script>
-<script src="assets/js/robot3d.js?v=5"></script>
+<script src="assets/js/theme.js?v=6"></script>
+<script src="assets/js/brandbot.js?v=6"></script>
+<script src="assets/js/robot.js?v=6"></script>
+<script src="assets/js/robot3d.js?v=6"></script>
 </body>
 </html>
