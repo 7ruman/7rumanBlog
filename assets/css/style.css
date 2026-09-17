@@ -267,7 +267,9 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .lightbox-cap { position: absolute; bottom: 24px; left: 0; right: 0; text-align: center; color: #cfd6e4; font-size: 13px; }
 
 /* ---------- KaTeX / Mermaid 容器 ---------- */
-.katex-display { overflow-x: auto; overflow-y: hidden; padding: 6px 0; }
+.math-block { margin: 22px 0; overflow-x: auto; text-align: center; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 6px 0; margin: 0; }
+.article .math { font-family: var(--serif); }
 .mermaid { text-align: center; margin: 20px 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 18px; overflow-x: auto; }
 .mermaid[data-processed] { background: transparent; border: 0; padding: 0; }
 
