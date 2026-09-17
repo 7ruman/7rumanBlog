@@ -24,10 +24,11 @@
 
     const kws = KW[lk] || [];
     const kwRe = new RegExp("^(?:" + kws.join("|") + ")\\b");
+    // 注意：所有 token 都必须限制在单行内，否则按行包装行号时 span 会被截断
     const commentRe = (lk === "py" || lk === "bash")
       ? /^#[^\n]*/
-      : /^\/\/[^\n]*|^\/\*[\s\S]*?\*\//;
-    const strRe = /^"(?:\\.|[^"\\])*"|^'(?:\\.|[^'\\])*'/;
+      : /^\/\/[^\n]*|^\/\*[^\n]*?\*\//;
+    const strRe = /^"(?:\\.|[^"\\\n])*"|^'(?:\\.|[^'\\\n])*'/;
     const numRe = /^\d+(?:\.\d+)?\b/;
 
     let out = "";

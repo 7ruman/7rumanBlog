@@ -1,5 +1,14 @@
 [
   {
+    "slug": "foc-current-loop",
+    "title": "FOC 电流环从公式到代码：离散 PI 与抗饱和",
+    "date": "2026-09-17",
+    "read": "6 分钟",
+    "tags": ["FOC", "电机控制", "C"],
+    "excerpt": "连续域 PI 如何离散成增量式，抗饱和怎么实现，附一份可直接抄的 Q15 参考实现。本文同时演示公式、流程图与目录功能。",
+    "file": "posts/foc-current-loop.md"
+  },
+  {
     "slug": "ethercat-stm32",
     "title": "把 SOEM EtherCAT 主站搬到 STM32H743 上",
     "date": "2026-09-15",
