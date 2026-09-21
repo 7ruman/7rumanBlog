@@ -56,7 +56,13 @@
       v.setAttribute("data-active", want);
       v.src = want;
       v.load();
+      // 每次换源都要重新挂播放兜底：once 监听器在上次加载时已被消耗，
+      // 否则切主题后新视频加载完成却没人调用 play()，画面就停住了
+      v.addEventListener("loadeddata", tryPlay, { once: true });
+      v.addEventListener("canplay", tryPlay, { once: true });
       tryPlay();
+      setTimeout(tryPlay, 400);
+      setTimeout(tryPlay, 1000);
     }
 
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -130,47 +136,65 @@
     const head = new THREE.Group();
     robot.add(head);
 
-    /* ---------- 头部：钢铁侠头盔 ---------- */
-    // 头盔壳（略修长的椭圆轮廓）
+    /* ---------- 头部：钢铁侠头盔（面甲特征线 + 盔壳） ---------- */
+    // 特征线工具：把脸面 2D 坐标 (x,y) 投影到头盔球面 (r=1, 正面朝 +z) 生成线条
+    function facePoint(x, y) {
+      const z2 = 1.0 - x * x - y * y;
+      return new THREE.Vector3(x, y, Math.sqrt(Math.max(z2, 0.001)));
+    }
+    function faceLine(parent, pts, role, op) {
+      const g = new THREE.BufferGeometry().setFromPoints(pts.map(([x, y]) => facePoint(x, y)));
+      const mat = new THREE.LineBasicMaterial({ color: colOf(role), transparent: true, opacity: op || 1, depthWrite: false });
+      mats.push({ mat, role, base: op || 1 });
+      parent.add(new THREE.Line(g, mat));
+    }
+
+    // 盔壳（线框椭圆，提供头盔体积）
     const helm = new THREE.Group(); helm.scale.set(0.95, 1.1, 0.98);
     addPart(helm, new THREE.SphereGeometry(1, 24, 16), "body", 1.03);
     head.add(helm);
 
-    // 面甲（前脸竖向板甲，钢铁侠脸罩的分块感）
+    // 面甲板（前脸扇区网格）
     const face = new THREE.Group(); face.scale.set(0.95, 1.1, 0.98);
     addPart(face, new THREE.SphereGeometry(1.012, 18, 12, Math.PI * 0.20, Math.PI * 0.60), "accent2", 1.05);
     head.add(face);
 
-    // 标志性横向眼缝（发光）
+    // —— 面甲外轮廓：额角 → 太阳穴 → 颧骨 → 下颌 → 尖下巴（闭合）——
+    faceLine(head, [
+      [0.00, 0.72], [0.42, 0.62], [0.62, 0.30], [0.56, -0.08], [0.32, -0.52],
+      [0.00, -0.76], [-0.32, -0.52], [-0.56, -0.08], [-0.62, 0.30], [-0.42, 0.62], [0.00, 0.72],
+    ], "accent2", 1.0);
+
+    // —— 面甲中央合缝（额头 → 下巴，脸甲左右两半的分缝）——
+    faceLine(head, [[0.00, 0.72], [0.00, -0.76]], "accent2", 0.9);
+
+    // —— 皱眉 V 形眉骨 ——
+    faceLine(head, [[-0.06, 0.30], [-0.44, 0.37]], "accent2", 0.95);
+    faceLine(head, [[0.06, 0.30], [0.44, 0.37]], "accent2", 0.95);
+
+    // —— 鼻梁 + 鼻头 ——
+    faceLine(head, [[0.00, 0.24], [0.00, -0.06]], "accent2", 0.95);
+    faceLine(head, [[-0.07, -0.13], [0.07, -0.13], [0.00, -0.24], [-0.07, -0.13]], "accent2", 0.9);
+
+    // —— 嘴缝 + 下唇线 ——
+    faceLine(head, [[-0.16, -0.40], [0.16, -0.40]], "body", 1.0);
+    faceLine(head, [[-0.10, -0.48], [0.10, -0.48]], "accent2", 0.85);
+
+    // —— 发光眼缝（贴面线框 + 发光条），位于眉骨下方 ——
     const eyes = new THREE.Group(); head.add(eyes);
     let eyeL, eyeR;
     for (const sx of [-1, 1]) {
+      const ex = sx * 0.25, w = 0.19, y0 = 0.06, y1 = 0.16;
+      faceLine(head, [
+        [ex - w, y1], [ex + w, y1], [ex + w + 0.04, y0 + 0.045],
+        [ex + w, y0], [ex - w, y0], [ex - w - 0.04, y0 + 0.045], [ex - w, y1],
+      ], "eye", 1.0);
       const eye = new THREE.Group();
-      eye.position.set(sx * 0.30, 0.18, 0.86);
-      eye.rotation.y = sx * 0.30;
-      addPart(eye, new THREE.BoxGeometry(0.36, 0.06, 0.06), "eye", 1.22);
+      eye.position.set(sx * 0.25, 0.11, 0.94);
+      eye.rotation.y = sx * 0.26;
+      addPart(eye, new THREE.BoxGeometry(0.40, 0.055, 0.05), "eye", 1.25);
       eyes.add(eye);
       if (sx < 0) eyeL = eye; else eyeR = eye;
-    }
-
-    // 额线 / 嘴缝 / 下巴弧
-    const brow = new THREE.Group(); brow.position.set(0, 0.35, 0.87); brow.rotation.x = -0.18;
-    addPart(brow, new THREE.BoxGeometry(0.6, 0.025, 0.05), "body", 1.1);
-    head.add(brow);
-    const mouth = new THREE.Group(); mouth.position.set(0, -0.40, 0.90);
-    addPart(mouth, new THREE.BoxGeometry(0.30, 0.04, 0.05), "body", 1.1);
-    head.add(mouth);
-    const chin = new THREE.Group(); chin.position.set(0, -0.66, 0.72); chin.rotation.x = Math.PI / 2;
-    addPart(chin, new THREE.TorusGeometry(0.24, 0.02, 6, 20, Math.PI), "accent2", 1.1);
-    head.add(chin);
-
-    // 侧颊线条（耳侧斜向下颌的装甲缝）
-    for (const sx of [-1, 1]) {
-      const cheek = new THREE.Group();
-      cheek.position.set(sx * 0.64, -0.20, 0.58);
-      cheek.rotation.set(0.45, sx * 0.55, sx * 0.35);
-      addPart(cheek, new THREE.CylinderGeometry(0.016, 0.016, 0.95, 6), "accent2", 1.1);
-      head.add(cheek);
     }
 
     // 头顶脊线（头盔中缝）+ 耳部
@@ -284,9 +308,9 @@
         ringG.rotation.z = t * 0.5;
         ring2.rotation.z = -t * 0.8;
       }
-      eyeL.position.x = -0.30 + px * 0.05;
-      eyeR.position.x = 0.30 + px * 0.05;
-      eyeL.position.y = eyeR.position.y = 0.18 - py * 0.04;
+      eyeL.position.x = -0.25 + px * 0.05;
+      eyeR.position.x = 0.25 + px * 0.05;
+      eyeL.position.y = eyeR.position.y = 0.11 - py * 0.04;
 
       camera.position.x = px * 0.32;
       camera.lookAt(0, -0.8, 0);
