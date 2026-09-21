@@ -135,6 +135,9 @@
     scene.add(robot);
     const head = new THREE.Group();
     robot.add(head);
+    // 手绘兜底头部（真实模型线框加载失败时才显示）
+    const handHead = new THREE.Group();
+    head.add(handHead);
 
     /* ---------- 头部：钢铁侠头盔（面甲特征线 + 盔壳） ---------- */
     // 特征线工具：把脸面 2D 坐标 (x,y) 投影到头盔球面 (r=1, 正面朝 +z) 生成线条
@@ -152,40 +155,40 @@
     // 盔壳（线框椭圆，提供头盔体积）
     const helm = new THREE.Group(); helm.scale.set(0.95, 1.1, 0.98);
     addPart(helm, new THREE.SphereGeometry(1, 24, 16), "body", 1.03);
-    head.add(helm);
+    handHead.add(helm);
 
     // 面甲板（前脸扇区网格）
     const face = new THREE.Group(); face.scale.set(0.95, 1.1, 0.98);
     addPart(face, new THREE.SphereGeometry(1.012, 18, 12, Math.PI * 0.20, Math.PI * 0.60), "accent2", 1.05);
-    head.add(face);
+    handHead.add(face);
 
     // —— 面甲外轮廓：额角 → 太阳穴 → 颧骨 → 下颌 → 尖下巴（闭合）——
-    faceLine(head, [
+    faceLine(handHead, [
       [0.00, 0.72], [0.42, 0.62], [0.62, 0.30], [0.56, -0.08], [0.32, -0.52],
       [0.00, -0.76], [-0.32, -0.52], [-0.56, -0.08], [-0.62, 0.30], [-0.42, 0.62], [0.00, 0.72],
     ], "accent2", 1.0);
 
     // —— 面甲中央合缝（额头 → 下巴，脸甲左右两半的分缝）——
-    faceLine(head, [[0.00, 0.72], [0.00, -0.76]], "accent2", 0.9);
+    faceLine(handHead, [[0.00, 0.72], [0.00, -0.76]], "accent2", 0.9);
 
     // —— 皱眉 V 形眉骨 ——
-    faceLine(head, [[-0.06, 0.30], [-0.44, 0.37]], "accent2", 0.95);
-    faceLine(head, [[0.06, 0.30], [0.44, 0.37]], "accent2", 0.95);
+    faceLine(handHead, [[-0.06, 0.30], [-0.44, 0.37]], "accent2", 0.95);
+    faceLine(handHead, [[0.06, 0.30], [0.44, 0.37]], "accent2", 0.95);
 
     // —— 鼻梁 + 鼻头 ——
-    faceLine(head, [[0.00, 0.24], [0.00, -0.06]], "accent2", 0.95);
-    faceLine(head, [[-0.07, -0.13], [0.07, -0.13], [0.00, -0.24], [-0.07, -0.13]], "accent2", 0.9);
+    faceLine(handHead, [[0.00, 0.24], [0.00, -0.06]], "accent2", 0.95);
+    faceLine(handHead, [[-0.07, -0.13], [0.07, -0.13], [0.00, -0.24], [-0.07, -0.13]], "accent2", 0.9);
 
     // —— 嘴缝 + 下唇线 ——
-    faceLine(head, [[-0.16, -0.40], [0.16, -0.40]], "body", 1.0);
-    faceLine(head, [[-0.10, -0.48], [0.10, -0.48]], "accent2", 0.85);
+    faceLine(handHead, [[-0.16, -0.40], [0.16, -0.40]], "body", 1.0);
+    faceLine(handHead, [[-0.10, -0.48], [0.10, -0.48]], "accent2", 0.85);
 
     // —— 发光眼缝（贴面线框 + 发光条），位于眉骨下方 ——
-    const eyes = new THREE.Group(); head.add(eyes);
+    const eyes = new THREE.Group(); handHead.add(eyes);
     let eyeL, eyeR;
     for (const sx of [-1, 1]) {
       const ex = sx * 0.25, w = 0.19, y0 = 0.06, y1 = 0.16;
-      faceLine(head, [
+      faceLine(handHead, [
         [ex - w, y1], [ex + w, y1], [ex + w + 0.04, y0 + 0.045],
         [ex + w, y0], [ex - w, y0], [ex - w - 0.04, y0 + 0.045], [ex - w, y1],
       ], "eye", 1.0);
@@ -200,16 +203,43 @@
     // 头顶脊线（头盔中缝）+ 耳部
     const crest = new THREE.Group(); crest.position.set(0, 1.05, 0);
     addPart(crest, new THREE.BoxGeometry(0.05, 0.06, 1.45), "accent2", 1.12);
-    head.add(crest);
+    handHead.add(crest);
     for (const sx of [-1, 1]) {
       const ear = new THREE.Group(); ear.position.set(sx * 0.97, 0.02, 0);
       addPart(ear, new THREE.CylinderGeometry(0.18, 0.18, 0.13, 14), "body", 1.06);
       ear.rotation.z = Math.PI / 2;
-      head.add(ear);
+      handHead.add(ear);
       const dot = new THREE.Group(); dot.position.set(sx * 1.07, 0.02, 0);
       addPart(dot, new THREE.SphereGeometry(0.05, 9, 7), "eye", 1.2);
-      head.add(dot);
+      handHead.add(dot);
     }
+
+    // 真实钢铁侠面甲：开源模型特征棱边（CC BY, github.com/alexespartano/ironman-helmet-stl）
+    // 预提取的线段 JSON（~270KB），加载成功后替换手绘兜底头
+    fetch("assets/media/ironman-edges.json?v=1")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((data) => {
+        const arr = new Float32Array(data.e);
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+        const mat = new THREE.LineBasicMaterial({ color: colOf("accent2"), transparent: true, opacity: 1.0, depthWrite: false });
+        mats.push({ mat, role: "accent2", base: 1.0 });
+        const helmet = new THREE.LineSegments(g, mat);
+        helmet.position.y = 0.10;
+        head.add(helmet);
+        // 发光眼缝（位置按模型眼洞实测）
+        const ironEyes = new THREE.Group();
+        for (const sx of [-1, 1]) {
+          const e = new THREE.Group();
+          e.position.set(sx * 0.22, -0.51, 1.30);
+          e.rotation.y = sx * 0.22;
+          addPart(e, new THREE.BoxGeometry(0.42, 0.07, 0.06), "eye", 1.25);
+          ironEyes.add(e);
+        }
+        head.add(ironEyes);
+        handHead.visible = false; // 模型到位 → 隐藏手绘兜底
+      })
+      .catch(() => {}); // 加载失败 → 保留手绘兜底头
 
     // 颈甲 / 胸甲（六棱柱，装甲板块感）
     const neck = new THREE.Group(); neck.position.y = -1.02;
