@@ -126,7 +126,7 @@
       new THREE.MeshBasicMaterial({ color: P.accent, transparent: true, opacity: 0.06, depthWrite: false })
     );
     disc.rotation.x = -Math.PI / 2;
-    disc.position.y = -3.18;
+    disc.position.y = -3.52;
     scene.add(disc);
 
     /* ---------- 机器人（低模几何 → 线框） ---------- */
@@ -225,15 +225,15 @@
         const mat = new THREE.LineBasicMaterial({ color: colOf("accent2"), transparent: true, opacity: 1.0, depthWrite: false });
         mats.push({ mat, role: "accent2", base: 1.0 });
         const helmet = new THREE.LineSegments(g, mat);
-        helmet.position.y = 0.10;
+        helmet.scale.setScalar(0.75); helmet.position.y = 0.10;
         head.add(helmet);
         // 发光眼缝（位置按模型眼洞实测）
         const ironEyes = new THREE.Group();
         for (const sx of [-1, 1]) {
           const e = new THREE.Group();
-          e.position.set(sx * 0.22, -0.51, 1.30);
+          e.position.set(sx * 0.165, -0.28, 0.99);
           e.rotation.y = sx * 0.22;
-          addPart(e, new THREE.BoxGeometry(0.42, 0.07, 0.06), "eye", 1.25);
+          addPart(e, new THREE.BoxGeometry(0.32, 0.055, 0.05), "eye", 1.25);
           ironEyes.add(e);
         }
         head.add(ironEyes);
@@ -242,11 +242,11 @@
       .catch(() => {}); // 加载失败 → 保留手绘兜底头
 
     // 颈甲 / 胸甲（六棱柱，装甲板块感）
-    const neck = new THREE.Group(); neck.position.y = -1.02;
+    const neck = new THREE.Group(); neck.position.y = -1.32;
     addPart(neck, new THREE.CylinderGeometry(0.30, 0.36, 0.30, 10), "body", 1.06);
     robot.add(neck);
 
-    const torso = new THREE.Group(); torso.position.y = -1.88;
+    const torso = new THREE.Group(); torso.position.y = -2.18;
     torso.rotation.y = Math.PI / 6;
     addPart(torso, new THREE.CylinderGeometry(0.82, 1.08, 1.35, 6), "body", 1.03);
     robot.add(torso);
@@ -254,44 +254,44 @@
     // 胸肌板（左右两块装甲，贴合胸甲斜面）
     for (const sx of [-1, 1]) {
       const pec = new THREE.Group();
-      pec.position.set(sx * 0.40, -1.60, 0.80);
+      pec.position.set(sx * 0.40, -1.90, 0.80);
       pec.rotation.set(0.28, sx * 0.38, 0);
       const pg = new THREE.Group(); pg.scale.set(1, 0.70, 0.42);
-      addPart(pg, new THREE.SphereGeometry(0.50, 14, 10), "body", 1.08);
+      addPart(pg, new THREE.SphereGeometry(0.42, 14, 10), "body", 1.08);
       pec.add(pg);
       robot.add(pec);
     }
 
     // 方舟反应堆（双环 + 核心）
-    const ringG = new THREE.Group(); ringG.position.set(0, -1.82, 0.98);
+    const ringG = new THREE.Group(); ringG.position.set(0, -2.12, 0.98);
     addPart(ringG, new THREE.TorusGeometry(0.36, 0.05, 8, 30), "eye", 1.1);
     robot.add(ringG);
-    const ring2 = new THREE.Group(); ring2.position.set(0, -1.82, 1.02);
+    const ring2 = new THREE.Group(); ring2.position.set(0, -2.12, 1.02);
     addPart(ring2, new THREE.TorusGeometry(0.21, 0.035, 8, 24), "accent2", 1.12);
     robot.add(ring2);
-    const core = new THREE.Group(); core.position.set(0, -1.82, 1.05);
+    const core = new THREE.Group(); core.position.set(0, -2.12, 1.05);
     addPart(core, new THREE.SphereGeometry(0.13, 12, 10), "accent2", 1.18);
     robot.add(core);
 
     // 腹部分节（装甲环）
     for (let i = 0; i < 2; i++) {
-      const ab = new THREE.Group(); ab.position.y = -2.74 - i * 0.32; ab.rotation.x = Math.PI / 2;
+      const ab = new THREE.Group(); ab.position.y = -3.04 - i * 0.32; ab.rotation.x = Math.PI / 2;
       addPart(ab, new THREE.TorusGeometry(0.84 - i * 0.07, 0.03, 6, 26), "body", 1.05);
       robot.add(ab);
     }
 
     // 球形肩甲 + 双段手臂 + 手
     for (const sx of [-1, 1]) {
-      const shoulder = new THREE.Group(); shoulder.position.set(sx * 1.14, -1.58, 0);
+      const shoulder = new THREE.Group(); shoulder.position.set(sx * 1.14, -1.88, 0);
       const sg = new THREE.Group(); sg.scale.set(1, 0.85, 1);
       addPart(sg, new THREE.SphereGeometry(0.44, 14, 10), "body", 1.08);
       shoulder.add(sg);
       robot.add(shoulder);
 
-      const arm = new THREE.Group(); arm.position.set(sx * 1.20, -2.28, 0); arm.rotation.z = -sx * 0.10;
+      const arm = new THREE.Group(); arm.position.set(sx * 1.20, -2.58, 0); arm.rotation.z = -sx * 0.10;
       addPart(arm, new THREE.CylinderGeometry(0.15, 0.12, 1.0, 10), "body", 1.06);
       robot.add(arm);
-      const hand = new THREE.Group(); hand.position.set(sx * 1.34, -2.86, 0);
+      const hand = new THREE.Group(); hand.position.set(sx * 1.34, -3.16, 0);
       addPart(hand, new THREE.SphereGeometry(0.18, 12, 9), "accent2", 1.1);
       robot.add(hand);
     }
@@ -313,7 +313,7 @@
       const w = window.innerWidth, h = window.innerHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      camera.position.z = w < 640 ? 8.8 : (w < 1024 ? 7.2 : 6.2);
+      camera.position.z = w < 640 ? 9.6 : (w < 1024 ? 7.9 : 6.8);
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", resize);
