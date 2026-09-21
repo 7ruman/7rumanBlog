@@ -39,12 +39,27 @@
     })
     .catch(showFallback);
 
-  // 背景视频：确保静音自动播放（部分浏览器会拦，需显式 play() 兜底）
+  // 背景视频：按主题切换（暗夜=G1 人形崎岖地形 / 白天=ANYmal 四足）+ 静音自动播放兜底
   (function setupStageVideo() {
     const v = document.querySelector(".stage-video video");
     if (!v) return;
+
+    const SRC = {
+      dark: v.getAttribute("data-src-dark") || "assets/media/g1-rough.mp4?v=1",
+      light: v.getAttribute("data-src-light") || "assets/media/anymal-rollout.mp4?v=1",
+    };
+    function tryPlay() { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+    function syncVideo() {
+      const theme = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+      const want = SRC[theme];
+      if (v.getAttribute("data-active") === want) return;
+      v.setAttribute("data-active", want);
+      v.src = want;
+      v.load();
+      tryPlay();
+    }
+
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
     if (v.readyState >= 2) tryPlay();
     v.addEventListener("loadeddata", tryPlay, { once: true });
     v.addEventListener("canplay", tryPlay, { once: true });
@@ -58,6 +73,9 @@
     window.addEventListener("touchstart", once);
     window.addEventListener("keydown", once);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) tryPlay(); });
+
+    syncVideo();
+    new MutationObserver(syncVideo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   })();
 
   function pal() {
@@ -112,66 +130,115 @@
     const head = new THREE.Group();
     robot.add(head);
 
-    // 头 / 面罩
-    addPart(head, new THREE.SphereGeometry(1, 20, 14), "body", 1.03);
-    const visorGeo = new THREE.SphereGeometry(0.78, 16, 12);
-    const visor = new THREE.Group();
-    visor.scale.set(1.12, 0.66, 0.44);
-    visor.position.set(0, 0.02, 0.52);
-    addPart(visor, visorGeo, "eye", 1.05);
-    head.add(visor);
+    /* ---------- 头部：钢铁侠头盔 ---------- */
+    // 头盔壳（略修长的椭圆轮廓）
+    const helm = new THREE.Group(); helm.scale.set(0.95, 1.1, 0.98);
+    addPart(helm, new THREE.SphereGeometry(1, 24, 16), "body", 1.03);
+    head.add(helm);
 
-    // 眼睛 + 瞳孔
-    const eyes = new THREE.Group();
-    const eyeGeo = new THREE.SphereGeometry(0.15, 12, 9);
-    const eyeL = new THREE.Group(); eyeL.position.set(-0.3, 0.06, 0.85); addPart(eyeL, eyeGeo, "eye", 1.12); eyes.add(eyeL);
-    const eyeR = new THREE.Group(); eyeR.position.set(0.3, 0.06, 0.85); addPart(eyeR, eyeGeo, "eye", 1.12); eyes.add(eyeR);
-    head.add(eyes);
-    const pupGeo = new THREE.SphereGeometry(0.062, 9, 7);
-    const pupL = new THREE.Group(); pupL.position.set(-0.3, 0.06, 0.985); addPart(pupL, pupGeo, "body", 1.1); head.add(pupL);
-    const pupR = new THREE.Group(); pupR.position.set(0.3, 0.06, 0.985); addPart(pupR, pupGeo, "body", 1.1); head.add(pupR);
+    // 面甲（前脸竖向板甲，钢铁侠脸罩的分块感）
+    const face = new THREE.Group(); face.scale.set(0.95, 1.1, 0.98);
+    addPart(face, new THREE.SphereGeometry(1.012, 18, 12, Math.PI * 0.20, Math.PI * 0.60), "accent2", 1.05);
+    head.add(face);
 
-    // 天线
-    const ant = new THREE.Group(); ant.position.set(0, 1.02, 0);
-    addPart(ant, new THREE.CylinderGeometry(0.03, 0.03, 0.42, 8, 1), "body", 1.08);
-    head.add(ant);
-    const antBall = new THREE.Group(); antBall.position.set(0, 1.27, 0);
-    addPart(antBall, new THREE.SphereGeometry(0.1, 12, 9), "accent2", 1.15);
-    head.add(antBall);
-
-    // 耳
+    // 标志性横向眼缝（发光）
+    const eyes = new THREE.Group(); head.add(eyes);
+    let eyeL, eyeR;
     for (const sx of [-1, 1]) {
-      const ear = new THREE.Group(); ear.position.set(sx * 1.0, 0, 0);
-      addPart(ear, new THREE.CylinderGeometry(0.17, 0.17, 0.14, 14), "body", 1.06);
+      const eye = new THREE.Group();
+      eye.position.set(sx * 0.30, 0.18, 0.86);
+      eye.rotation.y = sx * 0.30;
+      addPart(eye, new THREE.BoxGeometry(0.36, 0.06, 0.06), "eye", 1.22);
+      eyes.add(eye);
+      if (sx < 0) eyeL = eye; else eyeR = eye;
+    }
+
+    // 额线 / 嘴缝 / 下巴弧
+    const brow = new THREE.Group(); brow.position.set(0, 0.35, 0.87); brow.rotation.x = -0.18;
+    addPart(brow, new THREE.BoxGeometry(0.6, 0.025, 0.05), "body", 1.1);
+    head.add(brow);
+    const mouth = new THREE.Group(); mouth.position.set(0, -0.40, 0.90);
+    addPart(mouth, new THREE.BoxGeometry(0.30, 0.04, 0.05), "body", 1.1);
+    head.add(mouth);
+    const chin = new THREE.Group(); chin.position.set(0, -0.66, 0.72); chin.rotation.x = Math.PI / 2;
+    addPart(chin, new THREE.TorusGeometry(0.24, 0.02, 6, 20, Math.PI), "accent2", 1.1);
+    head.add(chin);
+
+    // 侧颊线条（耳侧斜向下颌的装甲缝）
+    for (const sx of [-1, 1]) {
+      const cheek = new THREE.Group();
+      cheek.position.set(sx * 0.64, -0.20, 0.58);
+      cheek.rotation.set(0.45, sx * 0.55, sx * 0.35);
+      addPart(cheek, new THREE.CylinderGeometry(0.016, 0.016, 0.95, 6), "accent2", 1.1);
+      head.add(cheek);
+    }
+
+    // 头顶脊线（头盔中缝）+ 耳部
+    const crest = new THREE.Group(); crest.position.set(0, 1.05, 0);
+    addPart(crest, new THREE.BoxGeometry(0.05, 0.06, 1.45), "accent2", 1.12);
+    head.add(crest);
+    for (const sx of [-1, 1]) {
+      const ear = new THREE.Group(); ear.position.set(sx * 0.97, 0.02, 0);
+      addPart(ear, new THREE.CylinderGeometry(0.18, 0.18, 0.13, 14), "body", 1.06);
+      ear.rotation.z = Math.PI / 2;
       head.add(ear);
-      const dot = new THREE.Group(); dot.position.set(sx * 1.1, 0, 0);
+      const dot = new THREE.Group(); dot.position.set(sx * 1.07, 0.02, 0);
       addPart(dot, new THREE.SphereGeometry(0.05, 9, 7), "eye", 1.2);
       head.add(dot);
     }
 
-    // 颈 / 躯干 / 胸口核心
+    // 颈甲 / 胸甲（六棱柱，装甲板块感）
     const neck = new THREE.Group(); neck.position.y = -1.02;
-    addPart(neck, new THREE.CylinderGeometry(0.26, 0.32, 0.36, 14), "body", 1.06);
+    addPart(neck, new THREE.CylinderGeometry(0.30, 0.36, 0.30, 10), "body", 1.06);
     robot.add(neck);
 
     const torso = new THREE.Group(); torso.position.y = -1.88;
-    addPart(torso, new THREE.CylinderGeometry(0.85, 1.05, 1.35, 18, 2), "body", 1.03);
+    torso.rotation.y = Math.PI / 6;
+    addPart(torso, new THREE.CylinderGeometry(0.82, 1.08, 1.35, 6), "body", 1.03);
     robot.add(torso);
 
+    // 胸肌板（左右两块装甲，贴合胸甲斜面）
+    for (const sx of [-1, 1]) {
+      const pec = new THREE.Group();
+      pec.position.set(sx * 0.40, -1.60, 0.80);
+      pec.rotation.set(0.28, sx * 0.38, 0);
+      const pg = new THREE.Group(); pg.scale.set(1, 0.70, 0.42);
+      addPart(pg, new THREE.SphereGeometry(0.50, 14, 10), "body", 1.08);
+      pec.add(pg);
+      robot.add(pec);
+    }
+
+    // 方舟反应堆（双环 + 核心）
     const ringG = new THREE.Group(); ringG.position.set(0, -1.82, 0.98);
-    addPart(ringG, new THREE.TorusGeometry(0.34, 0.05, 8, 30), "eye", 1.1);
+    addPart(ringG, new THREE.TorusGeometry(0.36, 0.05, 8, 30), "eye", 1.1);
     robot.add(ringG);
-    const core = new THREE.Group(); core.position.set(0, -1.82, 1.0);
-    addPart(core, new THREE.SphereGeometry(0.14, 12, 10), "accent2", 1.15);
+    const ring2 = new THREE.Group(); ring2.position.set(0, -1.82, 1.02);
+    addPart(ring2, new THREE.TorusGeometry(0.21, 0.035, 8, 24), "accent2", 1.12);
+    robot.add(ring2);
+    const core = new THREE.Group(); core.position.set(0, -1.82, 1.05);
+    addPart(core, new THREE.SphereGeometry(0.13, 12, 10), "accent2", 1.18);
     robot.add(core);
 
-    // 手臂
+    // 腹部分节（装甲环）
+    for (let i = 0; i < 2; i++) {
+      const ab = new THREE.Group(); ab.position.y = -2.74 - i * 0.32; ab.rotation.x = Math.PI / 2;
+      addPart(ab, new THREE.TorusGeometry(0.84 - i * 0.07, 0.03, 6, 26), "body", 1.05);
+      robot.add(ab);
+    }
+
+    // 球形肩甲 + 双段手臂 + 手
     for (const sx of [-1, 1]) {
-      const arm = new THREE.Group(); arm.position.set(sx * 1.12, -1.95, 0); arm.rotation.z = -sx * 0.22;
-      addPart(arm, new THREE.CylinderGeometry(0.13, 0.13, 1.1, 10), "body", 1.06);
+      const shoulder = new THREE.Group(); shoulder.position.set(sx * 1.14, -1.58, 0);
+      const sg = new THREE.Group(); sg.scale.set(1, 0.85, 1);
+      addPart(sg, new THREE.SphereGeometry(0.44, 14, 10), "body", 1.08);
+      shoulder.add(sg);
+      robot.add(shoulder);
+
+      const arm = new THREE.Group(); arm.position.set(sx * 1.20, -2.28, 0); arm.rotation.z = -sx * 0.10;
+      addPart(arm, new THREE.CylinderGeometry(0.15, 0.12, 1.0, 10), "body", 1.06);
       robot.add(arm);
-      const hand = new THREE.Group(); hand.position.set(sx * 1.25, -2.5, 0);
-      addPart(hand, new THREE.SphereGeometry(0.17, 12, 9), "accent2", 1.1);
+      const hand = new THREE.Group(); hand.position.set(sx * 1.34, -2.86, 0);
+      addPart(hand, new THREE.SphereGeometry(0.18, 12, 9), "accent2", 1.1);
       robot.add(hand);
     }
 
@@ -213,12 +280,13 @@
         head.position.y = Math.sin(t * 1.1 + 0.6) * 0.03;
         torso.rotation.z = Math.sin(t * 0.7) * 0.02;
         const s = 1 + Math.sin(t * 3.2) * 0.1;
-        antBall.scale.set(s, s, s);
+        core.scale.set(s, s, s);
         ringG.rotation.z = t * 0.5;
+        ring2.rotation.z = -t * 0.8;
       }
-      pupL.position.x = -0.3 + px * 0.055;
-      pupR.position.x = 0.3 + px * 0.055;
-      pupL.position.y = pupR.position.y = 0.06 - py * 0.045;
+      eyeL.position.x = -0.30 + px * 0.05;
+      eyeR.position.x = 0.30 + px * 0.05;
+      eyeL.position.y = eyeR.position.y = 0.18 - py * 0.04;
 
       camera.position.x = px * 0.32;
       camera.lookAt(0, -0.8, 0);
