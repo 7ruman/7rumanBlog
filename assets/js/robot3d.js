@@ -216,7 +216,7 @@
 
     // 真实钢铁侠面甲：开源模型特征棱边（CC BY, github.com/alexespartano/ironman-helmet-stl）
     // 预提取的线段 JSON（~270KB），加载成功后替换手绘兜底头
-    fetch("assets/media/ironman-edges.json?v=1")
+    fetch("assets/media/ironman-edges.json?v=2")
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data) => {
         const arr = new Float32Array(data.e);
@@ -225,15 +225,15 @@
         const mat = new THREE.LineBasicMaterial({ color: colOf("accent2"), transparent: true, opacity: 1.0, depthWrite: false });
         mats.push({ mat, role: "accent2", base: 1.0 });
         const helmet = new THREE.LineSegments(g, mat);
-        helmet.scale.setScalar(0.75); helmet.position.y = 0.10;
+        helmet.scale.setScalar(0.85); helmet.position.y = 0.18;
         head.add(helmet);
         // 发光眼缝（位置按模型眼洞实测）
         const ironEyes = new THREE.Group();
         for (const sx of [-1, 1]) {
           const e = new THREE.Group();
-          e.position.set(sx * 0.165, -0.28, 0.99);
+          e.position.set(sx * 0.19, -0.19, 1.11);
           e.rotation.y = sx * 0.22;
-          addPart(e, new THREE.BoxGeometry(0.32, 0.055, 0.05), "eye", 1.25);
+          addPart(e, new THREE.BoxGeometry(0.36, 0.06, 0.05), "eye", 1.25);
           ironEyes.add(e);
         }
         head.add(ironEyes);
@@ -256,8 +256,8 @@
       const pec = new THREE.Group();
       pec.position.set(sx * 0.40, -1.90, 0.80);
       pec.rotation.set(0.28, sx * 0.38, 0);
-      const pg = new THREE.Group(); pg.scale.set(1, 0.70, 0.42);
-      addPart(pg, new THREE.SphereGeometry(0.42, 14, 10), "body", 1.08);
+      const pg = new THREE.Group();
+      addPart(pg, new THREE.BoxGeometry(0.68, 0.52, 0.10), "body", 1.08);
       pec.add(pg);
       robot.add(pec);
     }
@@ -283,8 +283,8 @@
     // 球形肩甲 + 双段手臂 + 手
     for (const sx of [-1, 1]) {
       const shoulder = new THREE.Group(); shoulder.position.set(sx * 1.14, -1.88, 0);
-      const sg = new THREE.Group(); sg.scale.set(1, 0.85, 1);
-      addPart(sg, new THREE.SphereGeometry(0.44, 14, 10), "body", 1.08);
+      const sg = new THREE.Group(); sg.scale.set(1, 0.8, 1);
+      addPart(sg, new THREE.CylinderGeometry(0.36, 0.48, 0.38, 6), "body", 1.08);
       shoulder.add(sg);
       robot.add(shoulder);
 
@@ -292,7 +292,7 @@
       addPart(arm, new THREE.CylinderGeometry(0.15, 0.12, 1.0, 10), "body", 1.06);
       robot.add(arm);
       const hand = new THREE.Group(); hand.position.set(sx * 1.34, -3.16, 0);
-      addPart(hand, new THREE.SphereGeometry(0.18, 12, 9), "accent2", 1.1);
+      addPart(hand, new THREE.BoxGeometry(0.20, 0.28, 0.14), "accent2", 1.1);
       robot.add(hand);
     }
 
